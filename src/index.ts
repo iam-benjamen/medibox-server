@@ -6,8 +6,8 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "Server is running" });
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", message: "Server is running fine" });
 });
 
 // Start server
