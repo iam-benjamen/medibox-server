@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import Log, { ILog } from "../models/logs";
+import Log from "../models/logs";
 
 const router = express.Router();
 
@@ -49,6 +49,39 @@ router.get("/range", async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       message: "Error retrieving logs",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
+// GET: Retrieve adherence data
+router.get("/adherence", async (req: Request, res: Response) => {
+  try {
+    const logs = await Log.find();
+    const adherenceData = logs.reduce(
+      (acc, log) => {
+        if (log.status === true) {
+          acc[0].value += 1;
+        } else if (log.status === false) {
+          acc[1].value += 1;
+        }
+        return acc;
+      },
+      [
+        { name: "Taken", value: 0 },
+        { name: "Missed", value: 0 },
+      ]
+    );
+
+    // Calculate percentages
+    const total = adherenceData[0].value + adherenceData[1].value;
+    adherenceData[0].value = (adherenceData[0].value / total) * 100;
+    adherenceData[1].value = (adherenceData[1].value / total) * 100;
+
+    res.json(adherenceData);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error retrieving adherence data",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }

@@ -1,18 +1,22 @@
 import express, { Express } from "express";
+import { connectDB } from "./config/database";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import { connectDB } from "./config/database";
 import logRoutes from "./routes/logs";
+import metricsRoutes from "./routes/health"
+import cors from "cors";
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
+app.use(cors());
 app.use(express.json());
 
-// Log routes
+//api routes
 app.use("/api/logs", logRoutes);
+app.use("/api/health", metricsRoutes)
 
 // Health check route
 app.get("/health", (req, res) => {
@@ -22,7 +26,6 @@ app.get("/health", (req, res) => {
     dbStatus: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
   });
 });
-
 
 // Start server
 const startServer = async () => {
